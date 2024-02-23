@@ -11,19 +11,29 @@ import kotlin.contracts.contract
  */
 @JvmInline
 value class Maybe<out T> private constructor(
-    internal val rawValue: Any?,
+    private val value: Any?,
 ) {
     /**
-     * Check if Maybe is Some.
+     * Check if `Maybe` is `Some`.
      */
-    val isSome: Boolean get() = rawValue !== NONE
+    val isSome: Boolean get() = value !== NONE
 
     /**
-     * Check if Maybe is None.
+     * Check if `Maybe` is `None`.
      */
-    val isNone: Boolean get() = rawValue === NONE
+    val isNone: Boolean get() = value === NONE
 
-    override fun toString(): String = if (isSome) "Some($rawValue)" else "None"
+    /**
+     * Get the value of `Maybe`.
+     *
+     * **UNSAFE:** this function should be used only if `Maybe` is `Some`.
+     */
+    fun get(): T {
+        @Suppress("UNCHECKED_CAST")
+        return value as T
+    }
+
+    override fun toString(): String = if (isSome) "Some($value)" else "None"
 
     companion object {
         private object NONE
@@ -51,14 +61,14 @@ value class Maybe<out T> private constructor(
 }
 
 /**
- * Get the value of Maybe if it is Some, otherwise throw an exception.
+ * Get the value of `Maybe` if it is `Some`, otherwise `null`.
  */
-fun <T> Maybe<T>.get(): T {
-    check(isSome) { "Maybe is None" }
-    @Suppress("UNCHECKED_CAST")
-    return rawValue as T
-}
+fun <T : Any> Maybe<T>.getOrNull(): T? =
+    if (isSome) get() else null
 
+/**
+ * Get the value of `Maybe` if it is `Some`, otherwise compute and return the default value.
+ */
 inline fun <T : R, R> Maybe<T>.getOrElse(default: () -> R): R {
     contract {
         callsInPlace(default, InvocationKind.AT_MOST_ONCE)
@@ -66,12 +76,15 @@ inline fun <T : R, R> Maybe<T>.getOrElse(default: () -> R): R {
     return if (isSome) get() else default()
 }
 
+/**
+ * Get the value of `Maybe` if it is `Some`, otherwise return the default value.
+ */
 fun <T : R, R> Maybe<T>.getOrDefault(default: R): R {
     return if (isSome) get() else default
 }
 
 /**
- * Map the value inside Maybe if it is Some, otherwise return None.
+ * Map the value inside `Maybe` if it is `Some`, otherwise return None.
  *
  * ### Example:
  *     val x = Maybe.some(42)
@@ -86,7 +99,7 @@ inline fun <T, R> Maybe<T>.map(transform: (T) -> R): Maybe<R> {
 }
 
 /**
- * Flat-map the value of Maybe if it is Some, otherwise return None.
+ * Flat-map the value of `Maybe` if it is `Some`, otherwise return None.
  *
  * ### Example:
  *     val x = Maybe.some(42)
@@ -101,7 +114,7 @@ inline fun <T, R> Maybe<T>.flatMap(transform: (T) -> Maybe<R>): Maybe<R> {
 }
 
 /**
- * Apply the function on the value inside Maybe if it is Some.
+ * Apply the function on the value inside `Maybe` if it is `Some`.
  */
 inline fun <T> Maybe<T>.onSome(action: (T) -> Unit): Maybe<T> {
     contract {
@@ -112,7 +125,7 @@ inline fun <T> Maybe<T>.onSome(action: (T) -> Unit): Maybe<T> {
 }
 
 /**
- * Apply the function if Maybe is None.
+ * Apply the function if `Maybe` is `None`.
  */
 inline fun <T> Maybe<T>.onNone(action: () -> Unit): Maybe<T> {
     contract {
@@ -123,6 +136,6 @@ inline fun <T> Maybe<T>.onNone(action: () -> Unit): Maybe<T> {
 }
 
 /**
- * Convert nullable value to Maybe.
+ * Convert nullable value to `Maybe`.
  */
 fun <T : Any> T?.toMaybe(): Maybe<T> = Maybe.from(this)
