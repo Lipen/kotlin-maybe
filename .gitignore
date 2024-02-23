@@ -1,0 +1,14 @@
+build/
+target/
+.gradle/
+!gradle/wrapper/gradle-wrapper.jar
+
+## IntelliJ IDEA
+.idea/
+out/
+
+## VS Code
+.vscode/
+
+## Mac OS
+.DS_Store

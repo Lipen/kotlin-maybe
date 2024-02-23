@@ -1,0 +1,33 @@
+= `Maybe<T>` for Kotlin
+
+image:https://github.com/Lipen/kotlin-maybe/workflows/Build/badge.svg?branch=master["Build",link="https://github.com/Lipen/kotlin-maybe/actions"]
+image:https://jitpack.io/v/Lipen/kotlin-maybe.svg["JitPack",link="https://jitpack.io/p/Lipen/kotlin-maybe"]
+image:https://hitsofcode.com/github/Lipen/kotlin-maybe["Hits-of-Code",link="https://hitsofcode.com/view/github/Lipen/kotlin-maybe"]
+
+> This is a simple implementation of `Maybe<T>` for Kotlin.
+> It is a simple wrapper around a nullable value, with some utility methods to work with it.
+
+== Installation
+
+[source,kotlin]
+.build.gradle.kts
+----
+repositories {
+    maven("https://jitpack.io")
+}
+
+dependencies {
+    implementation("com.github.Lipen:kotlin-maybe:$version")
+}
+----
+
+== Library usage
+
+[source,kotlin]
+----
+val x: Maybe<Int> = Maybe.some(5)
+println(x) // Some(5)
+
+val y: Maybe<Int> = Maybe.none
+println(y) // None
+----
