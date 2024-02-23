@@ -1,6 +1,6 @@
 = `Maybe<T>` for Kotlin
 
-image:https://github.com/Lipen/kotlin-maybe/workflows/Build/badge.svg?branch=master["Build",link="https://github.com/Lipen/kotlin-maybe/actions"]
+image:https://github.com/Lipen/kotlin-maybe/actions/workflows/ci.yml/badge.svg?branch=master["CI",link="https://github.com/Lipen/kotlin-maybe/actions/workflows/ci.yml"]
 image:https://jitpack.io/v/Lipen/kotlin-maybe.svg["JitPack",link="https://jitpack.io/p/Lipen/kotlin-maybe"]
 image:https://hitsofcode.com/github/Lipen/kotlin-maybe["Hits-of-Code",link="https://hitsofcode.com/view/github/Lipen/kotlin-maybe"]
 
