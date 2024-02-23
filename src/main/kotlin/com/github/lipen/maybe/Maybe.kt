@@ -1,11 +1,17 @@
+@file:OptIn(ExperimentalContracts::class)
+
 package com.github.lipen.maybe
+
+import kotlin.contracts.ExperimentalContracts
+import kotlin.contracts.InvocationKind
+import kotlin.contracts.contract
 
 /**
  * A type that represents optional values.
  */
 @JvmInline
 value class Maybe<out T> private constructor(
-    private val rawValue: Any?,
+    internal val rawValue: Any?,
 ) {
     /**
      * Check if Maybe is Some.
@@ -16,15 +22,6 @@ value class Maybe<out T> private constructor(
      * Check if Maybe is None.
      */
     val isNone: Boolean get() = rawValue === NONE
-
-    /**
-     * Get the value of Maybe if it is Some, otherwise throw an exception.
-     */
-    fun get(): T {
-        check(isSome) { "Maybe is None" }
-        @Suppress("UNCHECKED_CAST")
-        return rawValue as T
-    }
 
     override fun toString(): String = if (isSome) "Some($rawValue)" else "None"
 
@@ -54,40 +51,74 @@ value class Maybe<out T> private constructor(
 }
 
 /**
- * Map the value of Maybe into Maybe if it is Some, otherwise return None.
- *
- * ### Example:
- *     val x = Maybe.some(42)
- *     val y = x.map { Maybe.some(it + 1) }
- *     println(y) // Some(43)
+ * Get the value of Maybe if it is Some, otherwise throw an exception.
  */
-inline fun <T, reified R> Maybe<T>.map(body: (T) -> Maybe<R>): Maybe<R> =
-    if (isNone) Maybe.none else body(get())
+fun <T> Maybe<T>.get(): T {
+    check(isSome) { "Maybe is None" }
+    @Suppress("UNCHECKED_CAST")
+    return rawValue as T
+}
+
+inline fun <T : R, R> Maybe<T>.getOrElse(default: () -> R): R {
+    contract {
+        callsInPlace(default, InvocationKind.AT_MOST_ONCE)
+    }
+    return if (isSome) get() else default()
+}
+
+fun <T : R, R> Maybe<T>.getOrDefault(default: R): R {
+    return if (isSome) get() else default
+}
 
 /**
  * Map the value inside Maybe if it is Some, otherwise return None.
  *
  * ### Example:
  *     val x = Maybe.some(42)
- *     val y = x.fmap { it + 1 }
+ *     val y = x.map { it + 1 }
  *     println(y) // Some(43)
  */
-inline fun <T, reified R> Maybe<T>.fmap(body: (T) -> R): Maybe<R> =
-    if (isNone) Maybe.none else Maybe.some(body(get()))
+inline fun <T, R> Maybe<T>.map(transform: (T) -> R): Maybe<R> {
+    contract {
+        callsInPlace(transform, InvocationKind.AT_MOST_ONCE)
+    }
+    return if (isNone) Maybe.none else Maybe.some(transform(get()))
+}
+
+/**
+ * Flat-map the value of Maybe if it is Some, otherwise return None.
+ *
+ * ### Example:
+ *     val x = Maybe.some(42)
+ *     val y = x.flatMap { Maybe.some(it + 1) }
+ *     println(y) // Some(43)
+ */
+inline fun <T, R> Maybe<T>.flatMap(transform: (T) -> Maybe<R>): Maybe<R> {
+    contract {
+        callsInPlace(transform, InvocationKind.AT_MOST_ONCE)
+    }
+    return if (isNone) Maybe.none else transform(get())
+}
 
 /**
  * Apply the function on the value inside Maybe if it is Some.
  */
-inline fun <T> Maybe<T>.onSome(body: (T) -> Unit): Maybe<T> {
-    if (isSome) body(get())
+inline fun <T> Maybe<T>.onSome(action: (T) -> Unit): Maybe<T> {
+    contract {
+        callsInPlace(action, InvocationKind.AT_MOST_ONCE)
+    }
+    if (isSome) action(get())
     return this
 }
 
 /**
  * Apply the function if Maybe is None.
  */
-inline fun <T> Maybe<T>.onNone(body: () -> Unit): Maybe<T> {
-    if (isNone) body()
+inline fun <T> Maybe<T>.onNone(action: () -> Unit): Maybe<T> {
+    contract {
+        callsInPlace(action, InvocationKind.AT_MOST_ONCE)
+    }
+    if (isNone) action()
     return this
 }
 

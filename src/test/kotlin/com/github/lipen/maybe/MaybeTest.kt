@@ -5,44 +5,53 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class MaybeTest {
+
     @Test
-    fun `test map on Some with Some output`() {
+    fun `test map on Some`() {
         val x = Maybe.some(42)
-        val y = x.map { Maybe.some(it + 1) }
+        val y = x.map { it + 1 }
         assertTrue(y.isSome)
         assertEquals(Maybe.some(43), y)
     }
 
     @Test
-    fun `test map on Some with None output`() {
-        val x = Maybe.some(42)
-        val y: Maybe<Int> = x.map { Maybe.none }
-        assertTrue(y.isNone)
-        assertEquals(Maybe.none, y)
-    }
-
-    @Test
-    fun `test map on None with Some output`() {
+    fun `test map on None`() {
         val x: Maybe<Int> = Maybe.none
-        val y = x.map { Maybe.some(it + 1) }
+        val y = x.map { it + 1 }
         assertTrue(y.isNone)
         assertEquals(Maybe.none, y)
     }
 
     @Test
-    fun `test map on None with None output`() {
+    fun `test flatMap on Some with Some output`() {
         val x = Maybe.some(42)
-        val y: Maybe<Int> = x.map { Maybe.none }
-        assertTrue(y.isNone)
-        assertEquals(Maybe.none, y)
-    }
-
-    @Test
-    fun `test fmap`() {
-        val x = Maybe.some(42)
-        val y = x.fmap { it + 1 }
+        val y = x.flatMap { Maybe.some(it + 1) }
         assertTrue(y.isSome)
         assertEquals(Maybe.some(43), y)
+    }
+
+    @Test
+    fun `test flatMap on Some with None output`() {
+        val x = Maybe.some(42)
+        val y: Maybe<Int> = x.flatMap { Maybe.none }
+        assertTrue(y.isNone)
+        assertEquals(Maybe.none, y)
+    }
+
+    @Test
+    fun `test flatMap on None with Some output`() {
+        val x: Maybe<Int> = Maybe.none
+        val y = x.flatMap { Maybe.some(it + 1) }
+        assertTrue(y.isNone)
+        assertEquals(Maybe.none, y)
+    }
+
+    @Test
+    fun `test flatMap on None with None output`() {
+        val x = Maybe.some(42)
+        val y: Maybe<Int> = x.flatMap { Maybe.none }
+        assertTrue(y.isNone)
+        assertEquals(Maybe.none, y)
     }
 
     @Test
